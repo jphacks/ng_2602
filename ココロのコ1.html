@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ココロのコ</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: #292929;
+      background: #fff;
+      font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+    }
+
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    /* スマートフォンでは画面いっぱいに表示 */
+    .app {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding-bottom: 76px;
+      position: relative;
+      background: #eee;
+    }
+
+    header {
+      height: 54px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    main { padding: 14px 20px 28px; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .section-title {
+      margin: 8px 0 20px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    /* TL */
+    .mood-card {
+      min-height: 390px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 4px;
+    }
+
+    .mood-card .prompt {
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .mood-card .mood {
+      margin-top: 8px;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .carousel-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .plain-button {
+      border: 0;
+      padding: 10px;
+      color: #555;
+      background: transparent;
+      font-size: 24px;
+    }
+
+    .dots {
+      color: #888;
+      letter-spacing: 4px;
+    }
+
+    /* 記録 */
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 190px;
+      padding: 14px;
+      resize: vertical;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      background: #fff;
+      outline-color: #999;
+    }
+
+    .mood-question { margin: 22px 0 12px; }
+
+    .moods {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mood-chip {
+      padding: 7px 13px;
+      border: 1px solid #bbb;
+      border-radius: 18px;
+      background: transparent;
+    }
+
+    .mood-chip.selected {
+      border-color: #555;
+      color: #fff;
+      background: #555;
+    }
+
+    .public-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 18px 0;
+      font-size: 14px;
+    }
+
+    .submit {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      color: #fff;
+      background: #333;
+    }
+
+    .message {
+      min-height: 22px;
+      font-size: 13px;
+    }
+
+    /* 過去・カレンダー */
+    .calendar {
+      padding: 16px 12px;
+      background: #fff;
+    }
+
+    .calendar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .calendar-head button {
+      padding: 6px;
+      border: 0;
+      background: transparent;
+    }
+
+    .month { font-weight: 600; }
+
+    .week, .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px 0;
+      text-align: center;
+    }
+
+    .week {
+      margin-bottom: 8px;
+      color: #888;
+      font-size: 12px;
+    }
+
+    .day {
+      position: relative;
+      display: grid;
+      min-height: 38px;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+    }
+
+    .day.has-record::after {
+      content: "";
+      position: absolute;
+      bottom: 3px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #555;
+    }
+
+    .day.selected {
+      color: #fff;
+      background: #444;
+    }
+
+    .day.selected::after { background: #fff; }
+    .day.empty { pointer-events: none; }
+
+    .day-records { margin-top: 20px; }
+
+    .record-item {
+      margin: 8px 0;
+      padding: 12px;
+      background: #fff;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    /* 画面下部のナビゲーション */
+    nav {
+      position: fixed;
+      z-index: 2;
+      bottom: 0;
+      left: 50%;
+      display: grid;
+      width: 100%;
+      height: 64px;
+      grid-template-columns: repeat(3, 1fr);
+      transform: translateX(-50%);
+      border-top: 1px solid #ddd;
+      background: rgba(255, 255, 255, .96);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    nav button {
+      border: 0;
+      color: #777;
+      background: transparent;
+      font-size: 13px;
+    }
+
+    nav button.active {
+      color: #222;
+      font-weight: 700;
+    }
+
+    /* 広い画面ではスマートフォン幅のプレビューとして中央に表示 */
+    @media (min-width: 600px) {
+      .app {
+        width: 390px;
+        min-height: calc(100vh - 48px);
+        margin-top: 24px;
+      }
+
+      nav {
+        bottom: 24px;
+        width: 390px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>ココロのコ</header>
+
+    <main>
+      <section id="tl" class="view active">
+        <div class="section-title">TL</div>
+        <div id="feed"></div>
+
+        <div class="carousel-controls">
+          <button class="plain-button" id="previous" aria-label="前の投稿">‹</button>
+          <span class="dots" id="dots"></span>
+          <button class="plain-button" id="next" aria-label="次の投稿">›</button>
+        </div>
+      </section>
+
+      <section id="record" class="view">
+        <div class="section-title">記録</div>
+        <textarea id="entry" placeholder="どんなことがありましたか？"></textarea>
+
+        <p class="mood-question">どんな気持ちでしたか？</p>
+        <div class="moods" id="moods"></div>
+
+        <label class="public-option">
+          <input id="isPublic" type="checkbox">
+          詳しい内容を公開する
+        </label>
+
+        <button class="submit" id="save">記録</button>
+        <p class="message" id="message"></p>
+      </section>
+
+      <section id="past" class="view">
+        <div class="section-title">カレンダー</div>
+
+        <div class="calendar">
+          <div class="calendar-head">
+            <button id="prevMonth">先月</button>
+            <span class="month" id="monthLabel"></span>
+            <button id="nextMonth">来月</button>
+          </div>
+
+          <div class="week">
+            <span>日</span><span>月</span><span>火</span>
+            <span>水</span><span>木</span><span>金</span><span>土</span>
+          </div>
+
+          <div class="days" id="days"></div>
+        </div>
+
+        <div class="day-records" id="dayRecords"></div>
+      </section>
+    </main>
+
+    <nav aria-label="メインメニュー">
+      <button class="active" data-view="tl">TL</button>
+      <button data-view="record">記録</button>
+      <button data-view="past">過去</button>
+    </nav>
+  </div>
+
+  <script>
+    const moodOptions = [
+      "うれしい", "かなしい", "たのしい", "わくわく", "むかつく",
+      "あんしん", "もやもや", "ゆううつ", "くるしい", "はずかしい"
+    ];
+
+    const samplePosts = [
+      { text: "何やら悲しいことがあったみたい", mood: "かなしい" },
+      { text: "何やら楽しいことがあったみたい", mood: "たのしい" },
+      { text: "何やら嬉しいことがあったみたい", mood: "うれしい" }
+    ];
+
+    let selectedMood = "";
+    let postIndex = 0;
+    let shownMonth = new Date();
+    let selectedDate = new Date();
+
+    function loadRecords() {
+      try {
+        return JSON.parse(localStorage.getItem("kokoro-records") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem("kokoro-records", JSON.stringify(records));
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function renderFeed() {
+      const savedPosts = loadRecords()
+        .filter(record => record.isPublic)
+        .map(record => ({
+          text: record.text || "記録がありました",
+          mood: record.mood
+        }));
+
+      const posts = [...savedPosts, ...samplePosts];
+      postIndex = (postIndex + posts.length) % posts.length;
+
+      const post = posts[postIndex];
+      document.getElementById("feed").innerHTML = `
+        <article class="mood-card">
+          <div>
+            <div class="prompt">${escapeHTML(post.text)}</div>
+            <div class="mood">${escapeHTML(post.mood || "")}</div>
+          </div>
+          <div>favorite　favorite　favorite</div>
+        </article>
+      `;
+
+      document.getElementById("dots").textContent =
+        "● ".repeat(posts.length).trim();
+    }
+
+    document.getElementById("moods").innerHTML = moodOptions.map(mood =>
+      `<button class="mood-chip" type="button" data-mood="${mood}">${mood}</button>`
+    ).join("");
+
+    document.getElementById("moods").addEventListener("click", event => {
+      const button = event.target.closest("[data-mood]");
+      if (!button) return;
+
+      selectedMood = button.dataset.mood;
+      document.querySelectorAll(".mood-chip").forEach(chip => {
+        chip.classList.toggle("selected", chip === button);
+      });
+    });
+
+    document.getElementById("save").addEventListener("click", () => {
+      const records = loadRecords();
+
+      records.push({
+        text: document.getElementById("entry").value.trim(),
+        mood: selectedMood,
+        isPublic: document.getElementById("isPublic").checked,
+        date: new Date().toISOString()
+      });
+
+      saveRecords(records);
+      document.getElementById("entry").value = "";
+      document.getElementById("isPublic").checked = false;
+      document.getElementById("message").textContent = "記録しました。";
+      selectedMood = "";
+
+      document.querySelectorAll(".mood-chip").forEach(chip => {
+        chip.classList.remove("selected");
+      });
+
+      renderCalendar();
+      renderFeed();
+    });
+
+    document.getElementById("previous").addEventListener("click", () => {
+      postIndex--;
+      renderFeed();
+    });
+
+    document.getElementById("next").addEventListener("click", () => {
+      postIndex++;
+      renderFeed();
+    });
+
+    document.querySelector("nav").addEventListener("click", event => {
+      const button = event.target.closest("[data-view]");
+      if (!button) return;
+
+      const view = button.dataset.view;
+
+      document.querySelectorAll(".view").forEach(section => {
+        section.classList.toggle("active", section.id === view);
+      });
+
+      document.querySelectorAll("nav button").forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+
+      if (view === "past") renderCalendar();
+    });
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function renderCalendar() {
+      const year = shownMonth.getFullYear();
+      const month = shownMonth.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+      const records = loadRecords();
+
+      document.getElementById("monthLabel").textContent =
+        `${year}年 ${month + 1}月`;
+
+      const cells = [];
+
+      for (let i = 0; i < firstDay; i++) {
+        cells.push('<span class="day empty"></span>');
+      }
+
+      for (let date = 1; date <= lastDate; date++) {
+        const key = dateKey(new Date(year, month, date));
+        const hasRecord = records.some(record =>
+          dateKey(new Date(record.date)) === key
+        );
+        const isSelected = dateKey(selectedDate) === key;
+
+        cells.push(`
+          <button
+            class="day ${hasRecord ? "has-record" : ""} ${isSelected ? "selected" : ""}"
+            data-date="${key}"
+          >${date}</button>
+        `);
+      }
+
+      document.getElementById("days").innerHTML = cells.join("");
+      renderDayRecords(dateKey(selectedDate));
+    }
+
+    function renderDayRecords(key) {
+      const records = loadRecords().filter(record =>
+        dateKey(new Date(record.date)) === key
+      );
+
+      const content = records.length
+        ? records.map(record => `
+            <div class="record-item">
+              <b>${escapeHTML(record.mood || "気持ち未選択")}</b><br>
+              ${escapeHTML(record.text || "内容の記録なし")}
+            </div>
+          `).join("")
+        : "<p>この日の記録はありません。</p>";
+
+      document.getElementById("dayRecords").innerHTML =
+        `<strong>${key}</strong>${content}`;
+    }
+
+    document.getElementById("days").addEventListener("click", event => {
+      const button = event.target.closest("[data-date]");
+      if (!button) return;
+
+      selectedDate = new Date(`${button.dataset.date}T00:00:00`);
+      renderCalendar();
+    });
+
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      shownMonth = new Date(
+        shownMonth.getFullYear(),
+        shownMonth.getMonth() - 1,
+        1
+      );
+      renderCalendar();
+    });
+
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      shownMonth = new Date(
+        shownMonth.getFullYear(),
+        shownMonth.getMonth() + 1,
+        1
+      );
+      renderCalendar();
+    });
+
+    renderFeed();
+    renderCalendar();
+  </script>
+</body>
+</html>
