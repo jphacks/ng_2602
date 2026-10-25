@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #71c385;
+      background-color: #B6EEBA;
       color: #4a3e3d;
       margin: 0;
       padding: 0;
@@ -114,9 +114,9 @@
     }
   </style>
 </head>
-<body class="flex justify-center min-h-screen bg-[#71c385]">
+<body class="flex justify-center min-h-screen bg-[#B6EEBA]">
 
-  <div id="app-wrapper" class="w-full max-w-md bg-[#71c385] min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden">
+  <div id="app-wrapper" class="w-full max-w-md bg-[#B6EEBA] min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden">
 
     <!-- ヘッダー (ロゴ.png) -->
     <header class="header-gradient pt-4 pb-2 px-4 text-center z-10 sticky top-0 flex flex-col items-center justify-center">
@@ -124,10 +124,10 @@
     </header>
 
     <!-- メインコンテンツ -->
-    <main id="main-content" class="flex-1 relative overflow-y-auto pb-24 bg-[#71c385]">
+    <main id="main-content" class="flex-1 relative overflow-y-auto pb-24 bg-[#B6EEBA]">
 
       <!-- ================= TL（タイムライン） ================= -->
-      <section id="tab-tl" class="min-h-full bg-[#71c385] p-4 flex flex-col items-center">
+      <section id="tab-tl" class="min-h-full bg-[#B6EEBA] p-4 flex flex-col items-center">
         <!-- 物理的に重ならない縦ストリームエリア -->
         <div id="tl-stream" class="w-full flex flex-col gap-4 mt-2"></div>
       </section>
@@ -319,7 +319,6 @@
       `;
     }
 
-    // TL用サンプル投稿データ（isMine: false の投稿は過去ページには出ない）
     let posts = [
       { id: 101, text: "課題で少しミスをして落ち込んだ...", emotions: [{name:"かなしい", val:4}, {name:"ゆううつ", val:3}], animal: "オオカミ", isPublic: true, isMine: false, likes: 0, likedCreatures: [], date: "2026-10-24 14:20", align: "left" },
       { id: 102, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", isPublic: true, isMine: true, likes: 3, likedCreatures: [{animal:"リス", face:"うれしい.png"}, {animal:"うさぎ", face:"はずかしい.png"}, {animal:"くま", face:"もやもや.png"}], date: "2026-10-25 17:30", align: "left" },
@@ -327,7 +326,6 @@
       { id: 104, text: "欲しかった本を手に入れた！読むのが楽しみ", emotions: [{name:"わくわく", val:5}], animal: "うさぎ", isPublic: true, isMine: false, likes: 2, likedCreatures: [{animal:"とら", face:"うれしい.png"}, {animal:"リス", face:"かなしい.png"}], date: "2026-10-25 09:15", align: "right" }
     ];
 
-    // 過去カレンダー用履歴データ（※自分自身の投稿のみを保持するイメージ）
     let historyRecords = {
       "2026-08-10": [{ id: 1, text: "夏休みのドライブに行ってきた！海がきれいだった", emotions: [{name:"たのしい", val:5}, {name:"わくわく", val:4}], animal: "とら", likes: 4, time: "14:00" }],
       "2026-08-15": [{ id: 2, text: "かき氷を食べた。すごく冷たくて夏を感じた！", emotions: [{name:"うれしい", val:4}], animal: "リス", likes: 2, time: "16:20" }],
@@ -394,15 +392,15 @@
       document.getElementById('tab-record').classList.add('hidden');
       document.getElementById('tab-history').classList.add('hidden');
 
-      document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#a1d6b0] text-[#3e5343] opacity-80";
+      document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#8bc99c] text-[#3e5343] opacity-80";
       document.getElementById('nav-record').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#52332a] opacity-80";
       document.getElementById('nav-history').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#574943] opacity-80";
 
       if (tabName === 'tl') {
         document.getElementById('tab-tl').classList.remove('hidden');
-        document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#71c385] text-white shadow-inner";
-        main.style.backgroundColor = '#71c385';
-        wrapper.style.backgroundColor = '#71c385';
+        document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#8bc99c] text-white shadow-inner";
+        main.style.backgroundColor = '#B6EEBA';
+        wrapper.style.backgroundColor = '#B6EEBA';
         renderTL();
       } else if (tabName === 'record') {
         document.getElementById('tab-record').classList.remove('hidden');
@@ -482,9 +480,7 @@
         creatureWrapper.className = "mt-0.5 pointer-events-none";
         creatureWrapper.innerHTML = renderCreatureHtml(post.animal, faceImgName);
 
-        // 吹き出し全体、またはキャラクター周りをどこをタップしても詳細が開くように設定
         wrapper.onclick = (e) => {
-          // ♡ボタンそのものが押された時は詳細開閉処理をスキップ
           if (e.target.closest('button')) return;
           if (post.isPublic) {
             const detailEl = document.getElementById(`detail-${post.id}`);
@@ -510,7 +506,6 @@
         const randomFace = FACE_IMAGES[Math.floor(Math.random() * FACE_IMAGES.length)];
         post.likedCreatures.push({ animal: randomAnimal, face: randomFace });
 
-        // 自分が作成した投稿（isMine: true）かつ過去履歴にあるものだけハート数を同期
         if (post.isMine) {
           for (let dateKey in historyRecords) {
             const hRec = historyRecords[dateKey].find(r => r.id === postId);
@@ -554,7 +549,7 @@
         emotions: selectedEmotions,
         animal: randomAnimal,
         isPublic: isPublic,
-        isMine: true, // 自分が記録した投稿
+        isMine: true,
         likes: 0,
         likedCreatures: [],
         align: align,
@@ -563,7 +558,6 @@
 
       posts.push(newPost);
 
-      // 過去ページ（カレンダー）に自分の記録を追加
       if (!historyRecords[TODAY_KEY]) {
         historyRecords[TODAY_KEY] = [];
       }
@@ -576,7 +570,6 @@
         time: "19:00"
       });
 
-      // モーダル表示
       document.getElementById('modal-creature-wrapper').innerHTML = renderCreatureHtml(randomAnimal, faceImgName, "creature-container text-6xl");
       document.getElementById('modal-text').innerText = `「${randomAnimal}のココロノコ」が生まれた！`;
       document.getElementById('modal-emotions').innerText = selectedEmotions.length > 0 
