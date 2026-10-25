@@ -238,4 +238,444 @@
         emotions.forEach(e => {
           if (e.val > maxVal) {
             maxVal = e.val;
-            mainEmotion = e.
+            mainEmotion = e.name;
+          }
+        });
+      }
+
+      const emoStr = typeof mainEmotion === 'string' ? mainEmotion : mainEmotion.name;
+
+      if (["うれしい", "たのしい", "わくわく"].includes(emoStr)) {
+        return "うれしい.png";
+      } else if (["もやもや", "ゆううつ"].includes(emoStr)) {
+        return "もやもや.png";
+      } else if (["くるしい", "かなしい"].includes(emoStr)) {
+        return "かなしい.png";
+      } else if (emoStr === "はずかしい") {
+        return "はずかしい.png";
+      } else if (emoStr === "むかつく") {
+        return "むかつく.png";
+      } else if (emoStr === "あんしん") {
+        return "あんしん.png";
+      }
+
+      return "ふくざつ.png";
+    }
+
+    // 会話要約文（感情未選択時の「言い表せない複雑な感情」ニュアンス対応）
+    function getSummaryText(emotions) {
+      if (!emotions || emotions.length === 0) {
+        return "言葉にならない、少し複雑なココロを感じているみたい";
+      }
+
+      const emotionNames = emotions.map(e => typeof e === 'string' ? e : e.name);
+
+      if (emotionNames.includes("かなしい") || emotionNames.includes("ゆううつ") || emotionNames.includes("くるしい")) {
+        return "何やら悲しいことがあったみたい";
+      } else if (emotionNames.includes("うれしい") || emotionNames.includes("たのしい") || emotionNames.includes("わくわく")) {
+        return "何やら嬉しいことがあったみたい";
+      } else if (emotionNames.includes("もやもや") || emotionNames.includes("むかつく")) {
+        return "何やらモヤモヤしているみたい";
+      } else if (emotionNames.includes("はずかしい")) {
+        return "何やら照れているみたい";
+      } else if (emotionNames.includes("あんしん")) {
+        return "ほっと一安心しているみたい";
+      }
+
+      return "言葉にならない、少し複雑なココロを感じているみたい";
+    }
+
+    // 動物ベース＋表情レイヤーHTML構築関数
+    function renderCreatureHtml(animalBase, faceImgName, sizeClass = "creature-container") {
+      const baseSrc = `${animalBase}.png`;
+      const faceSrc = faceImgName;
+
+      return `
+        <div class="${sizeClass}">
+          <img src="${baseSrc}" alt="${animalBase}" class="creature-base-img" onerror="this.style.display='none'; this.nextElementSibling.style.position='static';">
+          <img src="${faceSrc}" alt="表情" class="creature-face-img" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'70\' font-size=\'70\'>🐱</text></svg>';">
+        </div>
+      `;
+    }
+
+    // サンプル投稿データ
+    let posts = [
+      { id: 1, text: "課題で少しミスをして落ち込んだ...", emotions: [{name:"かなしい", val:4}, {name:"ゆううつ", val:3}], animal: "オオカミ", isPublic: true, isMine: false, likes: 0, likedCreatures: [], date: "2026-10-24 14:20", align: "left" },
+      { id: 2, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", isPublic: true, isMine: true, likes: 3, likedCreatures: ["リス", "うさぎ", "くま"], date: "2026-10-25 17:30", align: "left" },
+      { id: 3, text: "なんだか理由も分からずぼんやり考えごと...", emotions: [], animal: "くま", isPublic: false, isMine: false, likes: 1, likedCreatures: ["いぬ"], date: "2026-10-25 08:00", align: "right" },
+      { id: 4, text: "欲しかった本を手に入れた！読むのが楽しみ", emotions: [{name:"わくわく", val:5}], animal: "うさぎ", isPublic: true, isMine: false, likes: 2, likedCreatures: ["とら", "リス"], date: "2026-10-25 09:15", align: "right" }
+    ];
+
+    // 過去カレンダー用履歴データ
+    let historyRecords = {
+      "2026-08-10": [{ text: "夏休みのドライブに行ってきた！海がきれいだった", emotions: [{name:"たのしい", val:5}, {name:"わくわく", val:4}], animal: "とら", likes: 4, time: "14:00" }],
+      "2026-08-15": [{ text: "かき氷を食べた。すごく冷たくて夏を感じた！", emotions: [{name:"うれしい", val:4}], animal: "リス", likes: 2, time: "16:20" }],
+      "2026-08-28": [{ text: "夏休みの宿題がまだ終わらなくて焦ってきた...", emotions: [{name:"ゆううつ", val:4}, {name:"くるしい", val:3}], animal: "オオカミ", likes: 1, time: "21:00" }],
+      "2026-09-05": [{ text: "秋の風が少し吹き始めて気持ちいい", emotions: [{name:"あんしん", val:4}], animal: "いぬ", likes: 3, time: "17:40" }],
+      "2026-09-12": [{ text: "欲しかった洋服を買いに行けた！", emotions: [{name:"うれしい", val:5}, {name:"たのしい", val:4}], animal: "うさぎ", likes: 5, time: "13:10" }],
+      "2026-09-20": [{ text: "夜遅くまでプログラミングの練習をした", emotions: [{name:"もやもや", val:2}, {name:"わくわく", val:4}], animal: "くま", likes: 2, time: "23:15" }],
+      "2026-09-27": [{ text: "友だちとカラオケに行って大声で歌った！", emotions: [{name:"たのしい", val:5}], animal: "とら", likes: 6, time: "19:30" }],
+      "2026-10-15": [{ text: "久しぶりにカフェでゆっくり読書した", emotions: [{name:"あんしん", val:4}], animal: "リス", likes: 2, time: "15:00" }],
+      "2026-10-18": [{ text: "新しい曲を聴いて気分が上がった！", emotions: [{name:"たのしい", val:5}], animal: "いぬ", likes: 4, time: "11:20" }],
+      "2026-10-21": [{ text: "ちょっと失敗してモヤモヤした日", emotions: [{name:"もやもや", val:3}], animal: "くま", likes: 1, time: "20:10" }],
+      "2026-10-22": [{ text: "散歩中に可愛い野良猫に出会えた", emotions: [{name:"うれしい", val:4}], animal: "うさぎ", likes: 3, time: "16:45" }],
+      "2026-10-24": [{ text: "課題で少しミスをして落ち込んだ...", emotions: [{name:"かなしい", val:4}, {name:"ゆううつ", val:3}], animal: "オオカミ", likes: 0, time: "14:20" }],
+      "2026-10-25": [
+        { text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", likes: 3, time: "17:30" },
+        { text: "なんだか理由も分からずぼんやり考えごと...", emotions: [], animal: "くま", likes: 1, time: "08:00" },
+        { text: "欲しかった本を手に入れた！読むのが楽しみ", emotions: [{name:"わくわく", val:5}], animal: "うさぎ", likes: 2, time: "09:15" }
+      ]
+    };
+
+    function initEmotionInputs() {
+      const container = document.getElementById('emotions-container');
+      container.innerHTML = '';
+
+      EMOTION_TYPES.forEach((emo, idx) => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between gap-2 p-2 rounded-xl bg-[#fbf6f1] border border-[#f5e9df]";
+        
+        row.innerHTML = `
+          <label class="flex items-center gap-2 cursor-pointer shrink-0 w-28">
+            <input type="checkbox" id="check-emo-${idx}" value="${emo}" onchange="toggleSlider(${idx})" class="emotion-check accent-[#ee8572] w-4 h-4">
+            <span class="text-sm font-medium text-[#5a483e]">${emo}</span>
+          </label>
+          <div class="flex items-center gap-2 flex-1 opacity-40 transition-opacity" id="slider-box-${idx}">
+            <input type="range" id="range-emo-${idx}" min="1" max="5" value="3" disabled oninput="updateVal(${idx})" class="w-full accent-[#e88873] h-1.5 bg-[#ebdcd5] rounded-lg appearance-none cursor-pointer">
+            <span id="val-emo-${idx}" class="text-xs font-bold text-[#73584c] w-4 text-right">3</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleSlider(idx) {
+      const checked = document.getElementById(`check-emo-${idx}`).checked;
+      const box = document.getElementById(`slider-box-${idx}`);
+      const range = document.getElementById(`range-emo-${idx}`);
+      
+      if (checked) {
+        box.classList.remove('opacity-40');
+        range.disabled = false;
+      } else {
+        box.classList.add('opacity-40');
+        range.disabled = true;
+      }
+    }
+
+    function updateVal(idx) {
+      const val = document.getElementById(`range-emo-${idx}`).value;
+      document.getElementById(`val-emo-${idx}`).innerText = val;
+    }
+
+    function switchTab(tabName) {
+      const main = document.getElementById('main-content');
+      const wrapper = document.getElementById('app-wrapper');
+
+      document.getElementById('tab-tl').classList.add('hidden');
+      document.getElementById('tab-record').classList.add('hidden');
+      document.getElementById('tab-history').classList.add('hidden');
+
+      document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#a1d6b0] text-[#3e5343] opacity-80";
+      document.getElementById('nav-record').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#52332a] opacity-80";
+      document.getElementById('nav-history').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#574943] opacity-80";
+
+      if (tabName === 'tl') {
+        document.getElementById('tab-tl').classList.remove('hidden');
+        document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#71c385] text-white shadow-inner";
+        main.style.backgroundColor = '#71c385';
+        wrapper.style.backgroundColor = '#71c385';
+        renderTL();
+      } else if (tabName === 'record') {
+        document.getElementById('tab-record').classList.remove('hidden');
+        document.getElementById('nav-record').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#eba496] text-white shadow-inner";
+        main.style.backgroundColor = '#fdfbf7';
+        wrapper.style.backgroundColor = '#fdfbf7';
+      } else if (tabName === 'history') {
+        document.getElementById('tab-history').classList.remove('hidden');
+        document.getElementById('nav-history').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#c2a99b] text-white shadow-inner";
+        main.style.backgroundColor = '#fdfbf7';
+        wrapper.style.backgroundColor = '#fdfbf7';
+        renderCalendar();
+      }
+    }
+
+    function renderTL() {
+      const stream = document.getElementById('tl-stream');
+      stream.innerHTML = '';
+
+      const sortedPosts = [...posts].sort((a, b) => a.likes - b.likes);
+
+      sortedPosts.forEach((post, index) => {
+        const row = document.createElement('div');
+        row.className = `w-full flex ${post.align === 'right' ? 'justify-end' : 'justify-start'} my-1`;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex flex-col items-center max-w-[85%] floating-element cursor-pointer";
+        wrapper.style.animationDelay = `${(index % 3) * 0.8}s`;
+
+        const summaryText = getSummaryText(post.emotions);
+        const faceImgName = getFaceImageName(post.emotions);
+
+        const bubble = document.createElement('div');
+        bubble.className = "speech-bubble text-[#4a3e3d] text-xs font-bold px-3.5 py-2.5 shadow-md w-full text-center mb-1 flex flex-col gap-1.5";
+
+        const heartDisplay = post.isMine ? `♡ <span class="ml-1">${post.likes}</span>` : `♡`;
+
+        const publicIndicator = post.isPublic 
+          ? `<div class="text-[10px] text-[#8a9a86] font-normal flex items-center justify-center gap-1 mt-0.5"><span>タップで表示</span><span class="text-[9px]">▼</span></div>` 
+          : `<div class="text-[10px] text-[#a08a7e] font-normal flex items-center justify-center gap-1 mt-0.5"><span>🔒 秘密の記録</span></div>`;
+
+        const emoTagsHtml = post.emotions && post.emotions.length > 0 
+          ? post.emotions.map(e => {
+              const name = typeof e === 'string' ? e : e.name;
+              const val = typeof e === 'string' ? '' : `:${e.val}`;
+              return `<span class="text-[10px] bg-[#f7eae1] text-[#785d50] px-1.5 py-0.5 rounded">#${name}${val}</span>`;
+            }).join('')
+          : `<span class="text-[10px] bg-[#f0e8e2] text-[#8a7a70] px-1.5 py-0.5 rounded">#と言葉にならない気持ち</span>`;
+
+        bubble.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-left leading-relaxed">${summaryText}</span>
+            <button onclick="likePost(event, ${post.id})" class="text-rose-400 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-full transition flex items-center text-[11px] font-bold shrink-0">
+              ${heartDisplay}
+            </button>
+          </div>
+          ${publicIndicator}
+          <div id="detail-${post.id}" class="hidden text-left pt-2 border-t border-black/5 text-xs font-normal text-[#5a483e] animate-pop">
+            <p class="mb-1 leading-relaxed">${post.text}</p>
+            <div class="flex flex-wrap gap-1 mt-1">
+              ${emoTagsHtml}
+            </div>
+          </div>
+        `;
+
+        if (post.likedCreatures && post.likedCreatures.length > 0) {
+          const recentLikes = post.likedCreatures.slice(-4);
+          const likesListHtml = recentLikes.map(animalName => `<span class="bg-white/80 rounded-full px-1 shadow-xs text-xs">${animalName}</span>`).join('');
+          
+          const likesContainer = document.createElement('div');
+          likesContainer.className = "flex items-center justify-end gap-1 pt-1 border-t border-black/5 text-[10px] text-[#71584c]";
+          likesContainer.innerHTML = `<span class="opacity-75">共感:</span> <div class="flex gap-0.5">${likesListHtml}</div>`;
+          bubble.appendChild(likesContainer);
+        }
+
+        const creatureWrapper = document.createElement('div');
+        creatureWrapper.className = "mt-0.5";
+        creatureWrapper.innerHTML = renderCreatureHtml(post.animal, faceImgName);
+
+        wrapper.onclick = (e) => {
+          if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'SPAN') {
+            if (post.isPublic) {
+              const detailEl = document.getElementById(`detail-${post.id}`);
+              if (detailEl) detailEl.classList.toggle('hidden');
+            }
+          }
+        };
+
+        wrapper.appendChild(bubble);
+        wrapper.appendChild(creatureWrapper);
+        row.appendChild(wrapper);
+        stream.appendChild(row);
+      });
+    }
+
+    function likePost(event, postId) {
+      event.stopPropagation();
+      const post = posts.find(p => p.id === postId);
+      if (post) {
+        post.likes++;
+        if (!post.likedCreatures) post.likedCreatures = [];
+        
+        const randomLover = ANIMAL_BASES[Math.floor(Math.random() * ANIMAL_BASES.length)];
+        post.likedCreatures.push(randomLover);
+
+        renderTL();
+      }
+    }
+
+    function submitRecord() {
+      const text = document.getElementById('diary-input').value.trim();
+      const isPublic = document.getElementById('is-public').checked;
+      
+      const selectedEmotions = [];
+      EMOTION_TYPES.forEach((emo, idx) => {
+        const checked = document.getElementById(`check-emo-${idx}`).checked;
+        if (checked) {
+          const val = parseInt(document.getElementById(`range-emo-${idx}`).value);
+          selectedEmotions.push({ name: emo, val: val });
+        }
+      });
+
+      if (!text && selectedEmotions.length === 0) {
+        alert("メモか気持ちを入力してください！");
+        return;
+      }
+
+      // 6種類の動物ベースからランダムに決定
+      const randomAnimal = ANIMAL_BASES[Math.floor(Math.random() * ANIMAL_BASES.length)];
+      const faceImgName = getFaceImageName(selectedEmotions);
+      const align = Math.random() > 0.5 ? 'right' : 'left';
+
+      const newPost = {
+        id: Date.now(),
+        text: text || "言葉にならない気持ち",
+        emotions: selectedEmotions, // 未選択の場合は空配列
+        animal: randomAnimal,
+        isPublic: isPublic,
+        isMine: true,
+        likes: 0,
+        likedCreatures: [],
+        align: align,
+        date: "2026-10-25 19:00"
+      };
+
+      posts.push(newPost);
+
+      if (!historyRecords[TODAY_KEY]) {
+        historyRecords[TODAY_KEY] = [];
+      }
+      historyRecords[TODAY_KEY].push({
+        text: newPost.text,
+        emotions: newPost.emotions,
+        animal: newPost.animal,
+        likes: 0,
+        time: "19:00"
+      });
+
+      // モーダル生成
+      document.getElementById('modal-creature-wrapper').innerHTML = renderCreatureHtml(randomAnimal, faceImgName, "creature-container text-6xl");
+      document.getElementById('modal-text').innerText = `「${randomAnimal}のココロノコ」が生まれた！`;
+      document.getElementById('modal-emotions').innerText = selectedEmotions.length > 0 
+        ? `気持ち: ${selectedEmotions.map(e => `${e.name}(${e.val})`).join('・')}` 
+        : "気持ち: 言い表せない複雑な感情";
+      document.getElementById('birth-modal').classList.remove('hidden');
+
+      document.getElementById('diary-input').value = "";
+      EMOTION_TYPES.forEach((_, idx) => {
+        document.getElementById(`check-emo-${idx}`).checked = false;
+        toggleSlider(idx);
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('birth-modal').classList.add('hidden');
+      switchTab('tl');
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      } else if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      document.getElementById('calendar-month-title').innerText = `${currentYear}年 ${currentMonth}月`;
+
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = "h-12 text-[#bfaea6] opacity-30";
+        grid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const monthStr = currentMonth.toString().padStart(2, '0');
+        const dayStr = day.toString().padStart(2, '0');
+        const dateKey = `${currentYear}-${monthStr}-${dayStr}`;
+
+        const recordsList = historyRecords[dateKey] || [];
+        const isToday = (dateKey === TODAY_KEY);
+
+        const dayCell = document.createElement('div');
+        dayCell.className = `h-12 rounded-xl p-1 flex flex-col items-center justify-between cursor-pointer transition border ${
+          isToday ? 'bg-[#ffeedd] border-[#e88873] font-bold shadow-xs' : 
+          recordsList.length > 0 ? 'bg-white border-[#e0c3b5] shadow-xs' : 'border-transparent hover:bg-white/40'
+        }`;
+
+        dayCell.onclick = () => selectCalendarDay(dateKey, day, recordsList);
+
+        let creatureIcons = '';
+        if (recordsList.length > 0) {
+          creatureIcons = recordsList.slice(0, 3).map(r => renderCreatureHtml(r.animal, getFaceImageName(r.emotions), "creature-container-sm")).join('');
+        }
+
+        dayCell.innerHTML = `
+          <span class="${isToday ? 'text-[#e88873]' : ''}">${day}</span>
+          <div class="flex gap-0.5 justify-center">${creatureIcons}</div>
+        `;
+        grid.appendChild(dayCell);
+      }
+
+      const todayRecords = historyRecords[TODAY_KEY] || [];
+      selectCalendarDay(TODAY_KEY, 25, todayRecords);
+    }
+
+    function selectCalendarDay(dateKey, day, recordsList) {
+      const container = document.getElementById('day-detail-container');
+      container.innerHTML = '';
+
+      const [y, m, d] = dateKey.split('-');
+
+      if (recordsList && recordsList.length > 0) {
+        const header = document.createElement('div');
+        header.className = "text-xs font-bold text-[#73584c] px-1 flex justify-between items-center";
+        header.innerHTML = `<span>📅 ${y}年${parseInt(m)}月${parseInt(d)}日の記録 (${recordsList.length}件)</span>`;
+        container.appendChild(header);
+
+        recordsList.forEach((rec) => {
+          const card = document.createElement('div');
+          card.className = "bg-white border border-[#ebd8ce] rounded-2xl p-3 shadow-sm flex items-start gap-3";
+          
+          const emoTags = rec.emotions && rec.emotions.length > 0
+            ? rec.emotions.map(e => {
+                const name = typeof e === 'string' ? e : e.name;
+                const val = typeof e === 'string' ? '' : `:${e.val}`;
+                return `<span class="text-[10px] bg-[#f7eae1] text-[#785d50] px-2 py-0.5 rounded-md font-medium">#${name}${val}</span>`;
+              }).join('')
+            : `<span class="text-[10px] bg-[#f0e8e2] text-[#8a7a70] px-2 py-0.5 rounded-md font-medium">#と言葉にならない気持ち</span>`;
+
+          const likesCount = rec.likes !== undefined ? rec.likes : 0;
+          const faceImgName = getFaceImageName(rec.emotions);
+
+          card.innerHTML = `
+            <div class="shrink-0 mt-0.5">${renderCreatureHtml(rec.animal, faceImgName, "creature-container")}</div>
+            <div class="flex-1">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs text-[#a08a7e] font-medium">${rec.time || ''}</span>
+                <span class="text-xs text-rose-400 font-bold bg-rose-50 px-2 py-0.5 rounded-full">♡ ${likesCount}</span>
+              </div>
+              <p class="text-sm font-medium text-[#4a3e3d] mb-1.5 leading-relaxed">${rec.text}</p>
+              <div class="flex flex-wrap gap-1">
+                ${emoTags}
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } else {
+        container.innerHTML = `
+          <div class="bg-white border border-[#ebd8ce] rounded-2xl p-4 shadow-sm text-center">
+            <p class="text-xs text-[#a08a7e]">${y}年${parseInt(m)}月${parseInt(d)}日の記録はありません</p>
+          </div>
+        `;
+      }
+    }
+
+    initEmotionInputs();
+    switchTab('tl');
+  </script>
+
+</body>
+</html>
