@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ココロ♡のコ</title>
+  <title>ココロのコ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #CEFFE8;
+      background-color: #ECFFE8;
       color: #4a3e3d;
       margin: 0;
       padding: 0;
@@ -20,8 +20,14 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ヘッダーのグラデーション */
     .header-gradient {
-      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, rgba(249, 216, 188, 0) 100%);
+      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, #f9d8bc 100%);
+    }
+
+    /* 下側ナビゲーション：上側とまったく同じグラデーション＆完全に不透明で透けない */
+    .nav-gradient-bottom {
+      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, #f9d8bc 100%);
     }
 
     @keyframes floatSlow {
@@ -96,7 +102,7 @@
       z-index: 2;
     }
 
-    /* カレンダー用アイコン（小：四角の中に収まるサイズ） */
+    /* カレンダー用アイコン（小） */
     .creature-container-sm {
       position: relative;
       display: inline-block;
@@ -122,17 +128,29 @@
       mix-blend-mode: multiply;
     }
 
-    /* ナビゲーション用画像スタイル */
+    /* ナビゲーションアイコン画像スタイル（5倍サイズ：高さ約140px） */
     .nav-img {
-      max-height: 28px;
+      height: 140px;
       width: auto;
       object-fit: contain;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      cursor: pointer;
+    }
+    .nav-img:active {
+      transform: scale(0.95);
+    }
+    .nav-inactive {
+      opacity: 0.55;
+    }
+    .nav-active {
+      opacity: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
     }
   </style>
 </head>
-<body class="flex justify-center min-h-screen bg-[#ADE896]">
+<body class="flex justify-center min-h-screen bg-[#ECFFE8]">
 
-  <div id="app-wrapper" class="w-full max-w-md bg-[#ADE896] min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden">
+  <div id="app-wrapper" class="w-full max-w-md bg-[#ECFFE8] min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden">
 
     <!-- ヘッダー (ロゴ.png) -->
     <header class="header-gradient pt-4 pb-2 px-4 text-center z-10 sticky top-0 flex flex-col items-center justify-center">
@@ -140,10 +158,10 @@
     </header>
 
     <!-- メインコンテンツ -->
-    <main id="main-content" class="flex-1 relative overflow-y-auto pb-24 bg-[#ADE896]">
+    <main id="main-content" class="flex-1 relative overflow-y-auto pb-36 bg-[#ECFFE8]">
 
       <!-- ================= TL（タイムライン） ================= -->
-      <section id="tab-tl" class="min-h-full bg-[#ADE896] p-4 flex flex-col items-center">
+      <section id="tab-tl" class="min-h-full bg-[#ECFFE8] p-4 flex flex-col items-center">
         <!-- 物理的に重ならない縦ストリームエリア -->
         <div id="tl-stream" class="w-full flex flex-col gap-4 mt-2"></div>
       </section>
@@ -195,7 +213,6 @@
           <div class="flex justify-between items-center mb-4 px-2">
             <span id="calendar-month-title" class="text-md font-bold text-[#5e493e]">2026年 10月</span>
             <div class="flex gap-2">
-              <!-- 矢印のみの切り替えボタン -->
               <button onclick="changeMonth(-1)" class="text-xs bg-white/90 border border-[#d9c4ba] px-3 py-1.5 rounded-lg text-[#6e584c] shadow-xs hover:bg-white active:scale-95 transition font-bold">◀</button>
               <button onclick="changeMonth(1)" class="text-xs bg-white/90 border border-[#d9c4ba] px-3 py-1.5 rounded-lg text-[#6e584c] shadow-xs hover:bg-white active:scale-95 transition font-bold">▶</button>
             </div>
@@ -219,17 +236,17 @@
 
     </main>
 
-    <!-- ボトムナビゲーション（広場.png / かく.png / 思い出.png に変更） -->
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-16 bg-[#e0c9bc] flex justify-between items-stretch z-30 shadow-lg border-t border-[#d4b9ab]">
-      <button id="nav-tl" onclick="switchTab('tl')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#3e5343] transition-all bg-[#8bc99c]">
-        <img src="広場.png" alt="広場" class="nav-img" onerror="this.onerror=null; this.outerHTML='広場';">
-      </button>
-      <button id="nav-record" onclick="switchTab('record')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#52332a] transition-all bg-[#e38571]">
-        <img src="かく.png" alt="かく" class="nav-img" onerror="this.onerror=null; this.outerHTML='かく';">
-      </button>
-      <button id="nav-history" onclick="switchTab('history')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#574943] transition-all bg-[#d8c3b7]">
-        <img src="思い出.png" alt="思い出" class="nav-img" onerror="this.onerror=null; this.outerHTML='思い出';">
-      </button>
+    <!-- ボトムナビゲーション（上側とまったく同じグラデーション＆不透明） -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-28 nav-gradient-bottom flex justify-around items-center z-30 shadow-2xl border-t border-[#f2c7a8] px-4">
+      <div onclick="switchTab('tl')" class="cursor-pointer flex items-center justify-center">
+        <img id="nav-tl" src="広場.png" alt="広場" class="nav-img nav-active" onerror="this.onerror=null; this.outerHTML='<span class=\'font-bold text-sm text-[#7a4838]\'>広場</span>';">
+      </div>
+      <div onclick="switchTab('record')" class="cursor-pointer flex items-center justify-center">
+        <img id="nav-record" src="かく.png" alt="かく" class="nav-img nav-inactive" onerror="this.onerror=null; this.outerHTML='<span class=\'font-bold text-sm text-[#7a4838]\'>かく</span>';">
+      </div>
+      <div onclick="switchTab('history')" class="cursor-pointer flex items-center justify-center">
+        <img id="nav-history" src="思い出.png" alt="思い出" class="nav-img nav-inactive" onerror="this.onerror=null; this.outerHTML='<span class=\'font-bold text-sm text-[#7a4838]\'>思い出</span>';">
+      </div>
     </nav>
 
     <!-- 誕生演出モーダル -->
@@ -411,26 +428,27 @@
       document.getElementById('tab-record').classList.add('hidden');
       document.getElementById('tab-history').classList.add('hidden');
 
-      document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#8bc99c] text-[#3e5343] opacity-80";
-      document.getElementById('nav-record').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#52332a] opacity-80";
-      document.getElementById('nav-history').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#ebd0c7] text-[#574943] opacity-80";
+      const navTl = document.getElementById('nav-tl');
+      const navRecord = document.getElementById('nav-record');
+      const navHistory = document.getElementById('nav-history');
+
+      if (navTl) { navTl.className = "nav-img " + (tabName === 'tl' ? "nav-active" : "nav-inactive"); }
+      if (navRecord) { navRecord.className = "nav-img " + (tabName === 'record' ? "nav-active" : "nav-inactive"); }
+      if (navHistory) { navHistory.className = "nav-img " + (tabName === 'history' ? "nav-active" : "nav-inactive"); }
 
       if (tabName === 'tl') {
         document.getElementById('tab-tl').classList.remove('hidden');
-        document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#8bc99c] text-white shadow-inner";
-        main.style.backgroundColor = '#ADE896';
-        wrapper.style.backgroundColor = '#ADE896';
+        main.style.backgroundColor = '#ECFFE8';
+        wrapper.style.backgroundColor = '#ECFFE8';
         
         sortTLOrder();
         renderTL();
       } else if (tabName === 'record') {
         document.getElementById('tab-record').classList.remove('hidden');
-        document.getElementById('nav-record').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#eba496] text-white shadow-inner";
         main.style.backgroundColor = '#fdfbf7';
         wrapper.style.backgroundColor = '#fdfbf7';
       } else if (tabName === 'history') {
         document.getElementById('tab-history').classList.remove('hidden');
-        document.getElementById('nav-history').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#c2a99b] text-white shadow-inner";
         main.style.backgroundColor = '#fdfbf7';
         wrapper.style.backgroundColor = '#fdfbf7';
         renderCalendar();
