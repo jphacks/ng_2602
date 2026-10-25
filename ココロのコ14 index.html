@@ -343,6 +343,9 @@
       ]
     };
 
+    // 現在画面に表示されている投稿のID順リスト（♡を押しても並び順が変わらないように保持）
+    let currentTLOrder = [];
+
     function initEmotionInputs() {
       const container = document.getElementById('emotions-container');
       container.innerHTML = '';
@@ -401,6 +404,9 @@
         document.getElementById('nav-tl').className = "flex-1 flex items-center justify-center font-bold text-lg transition-all bg-[#8bc99c] text-white shadow-inner";
         main.style.backgroundColor = '#B6EEBA';
         wrapper.style.backgroundColor = '#B6EEBA';
+        
+        // 画面切替時にハート数で新しくソートして配置を更新
+        sortTLOrder();
         renderTL();
       } else if (tabName === 'record') {
         document.getElementById('tab-record').classList.remove('hidden');
@@ -416,13 +422,22 @@
       }
     }
 
+    // ハート数で最新の表示順リストを作成する関数
+    function sortTLOrder() {
+      const sorted = [...posts].sort((a, b) => a.likes - b.likes);
+      currentTLOrder = sorted.map(p => p.id);
+    }
+
     function renderTL() {
       const stream = document.getElementById('tl-stream');
       stream.innerHTML = '';
 
-      const sortedPosts = [...posts].sort((a, b) => a.likes - b.likes);
+      // currentTLOrder に従って投稿を取得・描画（ソートし直さないため並び順が維持される）
+      const displayPosts = currentTLOrder
+        .map(id => posts.find(p => p.id === id))
+        .filter(p => p !== undefined);
 
-      sortedPosts.forEach((post, index) => {
+      displayPosts.forEach((post, index) => {
         const row = document.createElement('div');
         row.className = `w-full flex ${post.align === 'right' ? 'justify-end' : 'justify-start'} my-1`;
 
@@ -436,7 +451,7 @@
         const bubble = document.createElement('div');
         bubble.className = "speech-bubble text-[#4a3e3d] text-xs font-bold px-3.5 py-2.5 shadow-md w-full text-center mb-1 flex flex-col gap-1.5 cursor-pointer";
 
-        const heartDisplay = post.isMine ? `♡ <span class="ml-1">${post.likes}</span>` : `♡`;
+        const heartDisplay = post.isMine ? `♡ <span id="like-count-${post.id}" class="ml-1">${post.likes}</span>` : `♡`;
 
         const publicIndicator = post.isPublic 
           ? `<div class="text-[10px] text-[#8a9a86] font-normal flex items-center justify-center gap-1 mt-0.5"><span>タップで表示</span><span class="text-[9px]">▼</span></div>` 
@@ -466,15 +481,17 @@
           </div>
         `;
 
+        const likesContainer = document.createElement('div');
+        likesContainer.id = `likes-container-${post.id}`;
+        likesContainer.className = "flex items-center justify-end gap-1 pt-1 border-t border-black/5 text-[10px] text-[#71584c] pointer-events-none";
         if (post.likedCreatures && post.likedCreatures.length > 0) {
           const recentLikes = post.likedCreatures.slice(-4);
           const likesListHtml = recentLikes.map(lover => renderCreatureHtml(lover.animal, lover.face, "creature-container-md")).join('');
-          
-          const likesContainer = document.createElement('div');
-          likesContainer.className = "flex items-center justify-end gap-1 pt-1 border-t border-black/5 text-[10px] text-[#71584c] pointer-events-none";
           likesContainer.innerHTML = `<span class="opacity-75">共感:</span> <div class="flex gap-0.5 items-center">${likesListHtml}</div>`;
-          bubble.appendChild(likesContainer);
+        } else {
+          likesContainer.style.display = 'none';
         }
+        bubble.appendChild(likesContainer);
 
         const creatureWrapper = document.createElement('div');
         creatureWrapper.className = "mt-0.5 pointer-events-none";
@@ -495,6 +512,7 @@
       });
     }
 
+    // ♡ボタンクリック時の処理（画面を再描画・ソートせず部分的に表示だけ更新）
     function likePost(event, postId) {
       event.stopPropagation();
       const post = posts.find(p => p.id === postId);
@@ -506,6 +524,7 @@
         const randomFace = FACE_IMAGES[Math.floor(Math.random() * FACE_IMAGES.length)];
         post.likedCreatures.push({ animal: randomAnimal, face: randomFace });
 
+        // カレンダー履歴側のハート数も同期
         if (post.isMine) {
           for (let dateKey in historyRecords) {
             const hRec = historyRecords[dateKey].find(r => r.id === postId);
@@ -516,7 +535,19 @@
           }
         }
 
-        renderTL();
+        // DOMの一部のみをダイレクト更新（位置移動を発生させない）
+        const countEl = document.getElementById(`like-count-${postId}`);
+        if (countEl) {
+          countEl.innerText = post.likes;
+        }
+
+        const likesContainer = document.getElementById(`likes-container-${postId}`);
+        if (likesContainer) {
+          const recentLikes = post.likedCreatures.slice(-4);
+          const likesListHtml = recentLikes.map(lover => renderCreatureHtml(lover.animal, lover.face, "creature-container-md")).join('');
+          likesContainer.innerHTML = `<span class="opacity-75">共感:</span> <div class="flex gap-0.5 items-center">${likesListHtml}</div>`;
+          likesContainer.style.display = 'flex';
+        }
       }
     }
 
@@ -700,6 +731,7 @@
     }
 
     initEmotionInputs();
+    sortTLOrder(); // 初期ロード時の並び順を作成
     switchTab('tl');
   </script>
 
