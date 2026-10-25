@@ -245,7 +245,7 @@
 
       const emoStr = typeof mainEmotion === 'string' ? mainEmotion : mainEmotion.name;
 
-      if (["うれしい", "たのしい", "わくわく"].includes(emoStr)) {
+      if (["うれしい", "たのしい", "わくわく","あんしん"].includes(emoStr)) {
         return "うれしい.png";
       } else if (["もやもや", "ゆううつ"].includes(emoStr)) {
         return "もやもや.png";
@@ -255,11 +255,9 @@
         return "はずかしい.png";
       } else if (emoStr === "むかつく") {
         return "むかつく.png";
-      } else if (emoStr === "あんしん") {
-        return "あんしん.png";
       }
 
-      return "ふくざつ.png";
+      return "もやもや.png";
     }
 
     // 会話要約文（感情未選択時の「言い表せない複雑な感情」ニュアンス対応）
