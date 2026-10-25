@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ココロのコ</title>
+  <title>ココロ♡のコ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,30 +111,12 @@
       height: 16px;
     }
 
-    /* 独立した7種類のカスタムリアクションボタン（スタンプ）スタイル */
-    .custom-reaction-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #fffaf5;
-      border: 1px solid #ebd8ce;
-      border-radius: 10px;
-      padding: 4px 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .custom-reaction-btn:hover {
-      background: #fdf2e9;
-      transform: translateY(-1px);
-    }
-    .custom-reaction-btn:active {
-      transform: scale(0.92);
-      background: #f7ebd0;
-    }
-    .custom-reaction-img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
+    /* 共感リスト用アイコン（中） */
+    .creature-container-md {
+      position: relative;
+      display: inline-block;
+      width: 24px;
+      height: 24px;
     }
 
     /* ロゴ画像スタイル */
@@ -147,7 +129,7 @@
       mix-blend-mode: multiply;
     }
 
-    /* ナビゲーションアイコン画像スタイル（大サイズ：高さ約140px） */
+    /* ナビゲーションアイコン画像スタイル（5倍サイズ：高さ約140px） */
     .nav-img {
       height: 140px;
       width: auto;
@@ -165,6 +147,18 @@
       opacity: 1;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
     }
+
+    /* 詳細表示内の7連画像スタイル */
+    .detail-gallery-img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.6);
+      border: 1px solid #ebd8ce;
+      padding: 2px;
+      shrink: 0;
+    }
   </style>
 </head>
 <body class="flex justify-center min-h-screen bg-[#ECFFE8]">
@@ -179,13 +173,13 @@
     <!-- メインコンテンツ -->
     <main id="main-content" class="flex-1 relative overflow-y-auto pb-36 bg-[#ECFFE8]">
 
-      <!-- ================= TL（広場） ================= -->
+      <!-- ================= TL（タイムライン） ================= -->
       <section id="tab-tl" class="min-h-full bg-[#ECFFE8] p-4 flex flex-col items-center">
-        <!-- タイムラインエリア -->
+        <!-- 物理的に重ならない縦ストリームエリア -->
         <div id="tl-stream" class="w-full flex flex-col gap-4 mt-2"></div>
       </section>
 
-      <!-- ================= 記録 (かく) ================= -->
+      <!-- ================= 記録 ================= -->
       <section id="tab-record" class="hidden min-h-full bg-[#fdfbf7] p-5 flex flex-col gap-5">
         
         <div class="text-center my-2">
@@ -205,7 +199,7 @@
           <p class="text-[11px] text-[#a08a7e] mb-3 text-center">当てはまる感情にチェックを入れて、強さ（1〜5）を選んでください</p>
           
           <div id="emotions-container" class="flex flex-col gap-2.5">
-            <!-- JSで感情スライダー行を生成 -->
+            <!-- JSで動的に感情行（チェックボックス＋スライダー 1〜5）を生成 -->
           </div>
         </div>
 
@@ -220,7 +214,7 @@
 
       </section>
 
-      <!-- ================= 過去 (思い出 / カレンダー) ================= -->
+      <!-- ================= 過去 (カレンダー) ================= -->
       <section id="tab-history" class="hidden min-h-full bg-[#fdfbf7] p-4">
         
         <div class="text-center mb-3">
@@ -247,7 +241,7 @@
 
         <div id="day-detail-container" class="mt-4 flex flex-col gap-2">
           <div class="bg-white border border-[#ebd8ce] rounded-2xl p-4 shadow-sm text-center">
-            <p class="text-xs text-[#a08a7e]">日付をタップするとその日のすべての記録とスタンプが見られます</p>
+            <p class="text-xs text-[#a08a7e]">日付をタップするとその日のすべての記録が見られます</p>
           </div>
         </div>
 
@@ -255,7 +249,7 @@
 
     </main>
 
-    <!-- ボトムナビゲーション（グラデーション背景＋3つのタブ画像） -->
+    <!-- ボトムナビゲーション（上が薄く、下が濃い不透明グラデーション） -->
     <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-28 nav-gradient-bottom flex justify-around items-center z-30 shadow-2xl border-t border-[#f2c7a8] px-4">
       <div onclick="switchTab('tl')" class="cursor-pointer flex items-center justify-center">
         <img id="nav-tl" src="広場.png" alt="広場" class="nav-img nav-active" onerror="this.onerror=null; this.outerHTML='<span class=\'font-bold text-sm text-[#7a4838]\'>広場</span>';">
@@ -278,7 +272,7 @@
         <p id="modal-text" class="text-sm text-[#5a483e] font-medium mb-1">「何やら新しいココロが生まれたよ」</p>
         <p id="modal-emotions" class="text-xs text-[#9c8477] mb-4"></p>
         <button onclick="closeModal()" class="w-full bg-[#e88873] text-white font-bold py-2.5 rounded-xl shadow hover:bg-[#e07761] transition">
-          広場へ連れていく
+          みんなのもとへ放つ
         </button>
       </div>
     </div>
@@ -287,9 +281,14 @@
 
   <script>
     const ANIMAL_BASES = ["いぬ", "うさぎ", "くま", "とら", "オオカミ", "リス"];
-    
-    // ご指定の7種類のスタンプ画像リスト
-    const CUSTOM_REACTIONS = [
+    const FACE_IMAGES = ["うれしい.png", "かなしい.png", "もやもや.png", "はずかしい.png", "むかつく.png"];
+    const EMOTION_TYPES = [
+      "うれしい", "かなしい", "たのしい", "わくわく", "むかつく",
+      "あんしん", "もやもや", "ゆううつ", "くるしい", "はずかしい"
+    ];
+
+    // 詳細表示時に並べる7種類の画像リスト
+    const DETAIL_GALLERY_IMAGES = [
       "無題2194_20261025110110.png",
       "無題2194_20261025110128.png",
       "無題2194_20261025110133.png",
@@ -297,11 +296,6 @@
       "無題2194_20261025110146.png",
       "無題2194_20261025110151.png",
       "無題2194_20261025110222.png"
-    ];
-
-    const EMOTION_TYPES = [
-      "うれしい", "かなしい", "たのしい", "わくわく", "むかつく",
-      "あんしん", "もやもや", "ゆううつ", "くるしい", "はずかしい"
     ];
 
     let currentYear = 2026;
@@ -384,26 +378,26 @@
     }
 
     let posts = [
-      { id: 101, text: "課題で少しミスをして落ち込んだ...", emotions: [{name:"かなしい", val:4}, {name:"ゆううつ", val:3}], animal: "オオカミ", isPublic: true, isMine: false, likes: 0, reactions: {0:1, 2:1}, date: "2026-10-24 14:20", align: "left" },
-      { id: 102, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", isPublic: true, isMine: true, likes: 3, reactions: {0:2, 4:1, 6:3}, date: "2026-10-25 17:30", align: "left" },
-      { id: 103, text: "なんだか理由も分からずぼんやり考えごと...", emotions: [], animal: "くま", isPublic: false, isMine: false, likes: 1, reactions: {1:1}, date: "2026-10-25 08:00", align: "right" },
-      { id: 104, text: "欲しかった本を手に入れた！読むのが楽しみ", emotions: [{name:"わくわく", val:5}], animal: "うさぎ", isPublic: true, isMine: false, likes: 2, reactions: {3:2, 5:1}, date: "2026-10-25 09:15", align: "right" }
+      { id: 101, text: "課題で少しミスをして落ち込んだ...", emotions: [{name:"かなしい", val:4}, {name:"ゆううつ", val:3}], animal: "オオカミ", isPublic: true, isMine: false, likes: 0, likedCreatures: [], date: "2026-10-24 14:20", align: "left" },
+      { id: 102, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", isPublic: true, isMine: true, likes: 3, likedCreatures: [{animal:"リス", face:"うれしい.png"}, {animal:"うさぎ", face:"はずかしい.png"}, {animal:"くま", face:"もやもや.png"}], date: "2026-10-25 17:30", align: "left" },
+      { id: 103, text: "なんだか理由も分からずぼんやり考えごと...", emotions: [], animal: "くま", isPublic: false, isMine: false, likes: 1, likedCreatures: [{animal:"いぬ", face:"うれしい.png"}], date: "2026-10-25 08:00", align: "right" },
+      { id: 104, text: "欲しかった本を手に入れた！読むのが楽しみ", emotions: [{name:"わくわく", val:5}], animal: "うさぎ", isPublic: true, isMine: false, likes: 2, likedCreatures: [{animal:"とら", face:"うれしい.png"}, {animal:"リス", face:"かなしい.png"}], date: "2026-10-25 09:15", align: "right" }
     ];
 
     let historyRecords = {
-      "2026-08-10": [{ id: 1, text: "夏休みのドライブに行ってきた！海がきれいだった", emotions: [{name:"たのしい", val:5}, {name:"わくわく", val:4}], animal: "とら", likes: 4, reactions: {0:1, 1:2}, time: "14:00" }],
-      "2026-08-15": [{ id: 2, text: "かき氷を食べた。すごく冷たくて夏を感じた！", emotions: [{name:"うれしい", val:4}], animal: "リス", likes: 2, reactions: {2:1}, time: "16:20" }],
-      "2026-08-28": [{ id: 3, text: "夏休みの宿題がまだ終わらなくて焦ってきた...", emotions: [{name:"ゆううつ", val:4}, {name:"くるしい", val:3}], animal: "オオカミ", likes: 1, reactions: {3:1}, time: "21:00" }],
-      "2026-09-05": [{ id: 4, text: "秋の風が少し吹き始めて気持ちいい", emotions: [{name:"あんしん", val:4}], animal: "いぬ", likes: 3, reactions: {4:2}, time: "17:40" }],
-      "2026-09-12": [{ id: 5, text: "欲しかった洋服を買いに行けた！", emotions: [{name:"うれしい", val:5}, {name:"たのしい", val:4}], animal: "うさぎ", likes: 5, reactions: {5:3}, time: "13:10" }],
-      "2026-09-20": [{ id: 6, text: "夜遅くまでプログラミングの練習をした", emotions: [{name:"もやもや", val:2}, {name:"わくわく", val:4}], animal: "くま", likes: 2, reactions: {6:1}, time: "23:15" }],
-      "2026-09-27": [{ id: 7, text: "友だちとカラオケに行って大声で歌った！", emotions: [{name:"たのしい", val:5}], animal: "とら", likes: 6, reactions: {0:2, 1:1}, time: "19:30" }],
-      "2026-10-15": [{ id: 8, text: "久しぶりにカフェでゆっくり読書した", emotions: [{name:"あんしん", val:4}], animal: "リス", likes: 2, reactions: {2:1}, time: "15:00" }],
-      "2026-10-18": [{ id: 9, text: "新しい曲を聴いて気分が上がった！", emotions: [{name:"たのしい", val:5}], animal: "いぬ", likes: 4, reactions: {3:2}, time: "11:20" }],
-      "2026-10-21": [{ id: 10, text: "ちょっと失敗してモヤモヤした日", emotions: [{name:"もやもや", val:3}], animal: "くま", likes: 1, reactions: {4:1}, time: "20:10" }],
-      "2026-10-22": [{ id: 11, text: "散歩中に可愛い野良猫に出会えた", emotions: [{name:"うれしい", val:4}], animal: "うさぎ", likes: 3, reactions: {5:2}, time: "16:45" }],
+      "2026-08-10": [{ id: 1, text: "夏休みのドライブに行ってきた！海がきれいだった", emotions: [{name:"たのしい", val:5}, {name:"わくわく", val:4}], animal: "とら", likes: 4, time: "14:00" }],
+      "2026-08-15": [{ id: 2, text: "かき氷を食べた。すごく冷たくて夏を感じた！", emotions: [{name:"うれしい", val:4}], animal: "リス", likes: 2, time: "16:20" }],
+      "2026-08-28": [{ id: 3, text: "夏休みの宿題がまだ終わらなくて焦ってきた...", emotions: [{name:"ゆううつ", val:4}, {name:"くるしい", val:3}], animal: "オオカミ", likes: 1, time: "21:00" }],
+      "2026-09-05": [{ id: 4, text: "秋の風が少し吹き始めて気持ちいい", emotions: [{name:"あんしん", val:4}], animal: "いぬ", likes: 3, time: "17:40" }],
+      "2026-09-12": [{ id: 5, text: "欲しかった洋服を買いに行けた！", emotions: [{name:"うれしい", val:5}, {name:"たのしい", val:4}], animal: "うさぎ", likes: 5, time: "13:10" }],
+      "2026-09-20": [{ id: 6, text: "夜遅くまでプログラミングの練習をした", emotions: [{name:"もやもや", val:2}, {name:"わくわく", val:4}], animal: "くま", likes: 2, time: "23:15" }],
+      "2026-09-27": [{ id: 7, text: "友だちとカラオケに行って大声で歌った！", emotions: [{name:"たのしい", val:5}], animal: "とら", likes: 6, time: "19:30" }],
+      "2026-10-15": [{ id: 8, text: "久しぶりにカフェでゆっくり読書した", emotions: [{name:"あんしん", val:4}], animal: "リス", likes: 2, time: "15:00" }],
+      "2026-10-18": [{ id: 9, text: "新しい曲を聴いて気分が上がった！", emotions: [{name:"たのしい", val:5}], animal: "いぬ", likes: 4, time: "11:20" }],
+      "2026-10-21": [{ id: 10, text: "ちょっと失敗してモヤモヤした日", emotions: [{name:"もやもや", val:3}], animal: "くま", likes: 1, time: "20:10" }],
+      "2026-10-22": [{ id: 11, text: "散歩中に可愛い野良猫に出会えた", emotions: [{name:"うれしい", val:4}], animal: "うさぎ", likes: 3, time: "16:45" }],
       "2026-10-25": [
-        { id: 102, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", likes: 3, reactions: {0:2, 4:1, 6:3}, time: "17:30" }
+        { id: 102, text: "夕方の空がとってもキレイだった！", emotions: [{name:"あんしん", val:5}], animal: "いぬ", likes: 3, time: "17:30" }
       ]
     };
 
@@ -515,7 +509,7 @@
         const heartDisplay = post.isMine ? `♡ <span id="like-count-${post.id}" class="ml-1">${post.likes}</span>` : `♡`;
 
         const publicIndicator = post.isPublic 
-          ? `<div class="text-[10px] text-[#8a9a86] font-normal flex items-center justify-center gap-1 mt-0.5"><span>タップで詳細＆スタンプ</span><span class="text-[9px]">▼</span></div>` 
+          ? `<div class="text-[10px] text-[#8a9a86] font-normal flex items-center justify-center gap-1 mt-0.5"><span>タップで表示</span><span class="text-[9px]">▼</span></div>` 
           : `<div class="text-[10px] text-[#a08a7e] font-normal flex items-center justify-center gap-1 mt-0.5"><span>🔒 秘密の記録</span></div>`;
 
         const emoTagsHtml = post.emotions && post.emotions.length > 0 
@@ -526,24 +520,10 @@
             }).join('')
           : `<span class="text-[10px] bg-[#f0e8e2] text-[#8a7a70] px-1.5 py-0.5 rounded">#言葉にならない気持ち</span>`;
 
-        // 7種類のカスタムリアクションボタン群（広場からスタンプが押せる）
-        function getReactionsHtml(postId, reactionsObj) {
-          if (!reactionsObj) reactionsObj = {};
-          let html = '<div class="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 justify-center flex-wrap">';
-          CUSTOM_REACTIONS.forEach((imgSrc, rIdx) => {
-            const count = reactionsObj[rIdx] || 0;
-            html += `
-              <button onclick="clickReaction(event, ${postId}, ${rIdx})" class="custom-reaction-btn" title="スタンプを押す">
-                <img src="${imgSrc}" class="custom-reaction-img" onerror="this.style.display='none';">
-                <span id="react-count-${postId}-${rIdx}" class="text-[10px] text-[#73584c] font-bold mt-0.5">${count}</span>
-              </button>
-            `;
-          });
-          html += '</div>';
-          return html;
-        }
-
-        const reactionsHtml = getReactionsHtml(post.id, post.reactions);
+        // 詳細表示時の7連画像HTMLを生成
+        const galleryHtml = DETAIL_GALLERY_IMAGES.map(imgSrc => 
+          `<img src="${imgSrc}" class="detail-gallery-img" onerror="this.style.display='none';">`
+        ).join('');
 
         bubble.innerHTML = `
           <div class="flex items-center justify-between gap-2">
@@ -555,35 +535,23 @@
           <div class="pointer-events-none">${publicIndicator}</div>
           <div id="detail-${post.id}" class="hidden text-left pt-2 border-t border-black/5 text-xs font-normal text-[#5a483e] animate-pop pointer-events-none">
             <p class="mb-1 leading-relaxed">${post.text}</p>
-            <div class="flex flex-wrap gap-1 mt-1 mb-1">
+            <div class="flex flex-wrap gap-1 mt-1 mb-2">
               ${emoTagsHtml}
             </div>
-            <!-- 7種類のカスタムリアクションボタン（広場で押せる） -->
-            <div class="pointer-events-auto mt-2">
-              <p class="text-[10px] text-[#8a7266] font-bold text-center mb-1">スタンプを押して気持ちを送る</p>
-              ${reactionsHtml}
+            <!-- 内容のしたあたりの7連画像 -->
+            <div class="flex items-center gap-1 overflow-x-auto pt-1 pb-1">
+              ${galleryHtml}
             </div>
           </div>
         `;
 
         const likesContainer = document.createElement('div');
         likesContainer.id = `likes-container-${post.id}`;
-        likesContainer.className = "flex items-center justify-end gap-1.5 pt-1 border-t border-black/5 text-[10px] text-[#71584c] pointer-events-none";
-        
-        let hasReactions = false;
-        let summaryReactionsHtml = '';
-        if (post.reactions) {
-          CUSTOM_REACTIONS.forEach((imgSrc, rIdx) => {
-            const cnt = post.reactions[rIdx] || 0;
-            if (cnt > 0) {
-              hasReactions = true;
-              summaryReactionsHtml += `<div class="flex items-center gap-0.5 bg-white/70 px-1.5 py-0.5 rounded border border-black/5"><img src="${imgSrc}" style="width:14px;height:14px;object-fit:contain;"><span class="font-bold">${cnt}</span></div>`;
-            }
-          });
-        }
-
-        if (hasReactions) {
-          likesContainer.innerHTML = `<span class="opacity-75">スタンプ:</span> <div class="flex gap-1 items-center flex-wrap">${summaryReactionsHtml}</div>`;
+        likesContainer.className = "flex items-center justify-end gap-1 pt-1 border-t border-black/5 text-[10px] text-[#71584c] pointer-events-none";
+        if (post.likedCreatures && post.likedCreatures.length > 0) {
+          const recentLikes = post.likedCreatures.slice(-4);
+          const likesListHtml = recentLikes.map(lover => renderCreatureHtml(lover.animal, lover.face, "creature-container-md")).join('');
+          likesContainer.innerHTML = `<span class="opacity-75">共感:</span> <div class="flex gap-0.5 items-center">${likesListHtml}</div>`;
         } else {
           likesContainer.style.display = 'none';
         }
@@ -608,12 +576,17 @@
       });
     }
 
-    // ハートボタンクリック時
     function likePost(event, postId) {
       event.stopPropagation();
       const post = posts.find(p => p.id === postId);
       if (post) {
         post.likes++;
+        if (!post.likedCreatures) post.likedCreatures = [];
+        
+        const randomAnimal = ANIMAL_BASES[Math.floor(Math.random() * ANIMAL_BASES.length)];
+        const randomFace = FACE_IMAGES[Math.floor(Math.random() * FACE_IMAGES.length)];
+        post.likedCreatures.push({ animal: randomAnimal, face: randomFace });
+
         if (post.isMine) {
           for (let dateKey in historyRecords) {
             const hRec = historyRecords[dateKey].find(r => r.id === postId);
@@ -628,51 +601,13 @@
         if (countEl) {
           countEl.innerText = post.likes;
         }
-      }
-    }
 
-    // 広場（TL）で7種類のカスタムリアクションボタンをクリック（スタンプカウント+1）
-    function clickReaction(event, postId, rIdx) {
-      event.stopPropagation();
-      const post = posts.find(p => p.id === postId);
-      if (post) {
-        if (!post.reactions) post.reactions = {};
-        post.reactions[rIdx] = (post.reactions[rIdx] || 0) + 1;
-
-        // 自分の投稿であれば履歴（思い出）側にも即時同期
-        if (post.isMine) {
-          for (let dateKey in historyRecords) {
-            const hRec = historyRecords[dateKey].find(r => r.id === postId);
-            if (hRec) {
-              if (!hRec.reactions) hRec.reactions = {};
-              hRec.reactions[rIdx] = post.reactions[rIdx];
-              break;
-            }
-          }
-        }
-
-        // スタンプボタン上の表示を更新
-        const countSpan = document.getElementById(`react-count-${postId}-${rIdx}`);
-        if (countSpan) {
-          countSpan.innerText = post.reactions[rIdx];
-        }
-
-        // 投稿カード下部のスタンプサマリー表示もリアルタイム更新
         const likesContainer = document.getElementById(`likes-container-${postId}`);
         if (likesContainer) {
-          let hasReactions = false;
-          let summaryReactionsHtml = '';
-          CUSTOM_REACTIONS.forEach((imgSrc, i) => {
-            const cnt = post.reactions[i] || 0;
-            if (cnt > 0) {
-              hasReactions = true;
-              summaryReactionsHtml += `<div class="flex items-center gap-0.5 bg-white/70 px-1.5 py-0.5 rounded border border-black/5"><img src="${imgSrc}" style="width:14px;height:14px;object-fit:contain;"><span class="font-bold">${cnt}</span></div>`;
-            }
-          });
-          if (hasReactions) {
-            likesContainer.innerHTML = `<span class="opacity-75">スタンプ:</span> <div class="flex gap-1 items-center flex-wrap">${summaryReactionsHtml}</div>`;
-            likesContainer.style.display = 'flex';
-          }
+          const recentLikes = post.likedCreatures.slice(-4);
+          const likesListHtml = recentLikes.map(lover => renderCreatureHtml(lover.animal, lover.face, "creature-container-md")).join('');
+          likesContainer.innerHTML = `<span class="opacity-75">共感:</span> <div class="flex gap-0.5 items-center">${likesListHtml}</div>`;
+          likesContainer.style.display = 'flex';
         }
       }
     }
@@ -708,7 +643,7 @@
         isPublic: isPublic,
         isMine: true,
         likes: 0,
-        reactions: {},
+        likedCreatures: [],
         align: align,
         date: "2026-10-25 19:00"
       };
@@ -724,7 +659,6 @@
         emotions: newPost.emotions,
         animal: newPost.animal,
         likes: 0,
-        reactions: {},
         time: "19:00"
       });
 
@@ -808,7 +742,6 @@
       selectCalendarDay(TODAY_KEY, 25, todayRecords);
     }
 
-    // 思い出（過去）画面で各投稿に押してもらったスタンプ数の確認ができる
     function selectCalendarDay(dateKey, day, recordsList) {
       const container = document.getElementById('day-detail-container');
       container.innerHTML = '';
@@ -823,7 +756,7 @@
 
         recordsList.forEach((rec) => {
           const card = document.createElement('div');
-          card.className = "bg-white border border-[#ebd8ce] rounded-2xl p-3 shadow-sm flex flex-col gap-2";
+          card.className = "bg-white border border-[#ebd8ce] rounded-2xl p-3 shadow-sm flex items-start gap-3";
           
           const emoTags = rec.emotions && rec.emotions.length > 0
             ? rec.emotions.map(e => {
@@ -836,44 +769,18 @@
           const likesCount = rec.likes !== undefined ? rec.likes : 0;
           const faceImgName = getFaceImageName(rec.emotions);
 
-          // 思い出画面でのスタンプ獲得数一覧表示
-          let historyReactionsHtml = '';
-          if (rec.reactions) {
-            let hasAny = false;
-            CUSTOM_REACTIONS.forEach((imgSrc, rIdx) => {
-              const cnt = rec.reactions[rIdx] || 0;
-              if (cnt > 0) {
-                hasAny = true;
-                historyReactionsHtml += `
-                  <div class="flex items-center gap-1 bg-[#fbf6f1] border border-[#ebd8ce] px-2 py-1 rounded-lg">
-                    <img src="${imgSrc}" style="width:22px;height:22px;object-fit:contain;">
-                    <span class="text-xs font-bold text-[#73584c]">${cnt}</span>
-                  </div>
-                `;
-              }
-            });
-            if (hasAny) {
-              historyReactionsHtml = `<div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-black/5 items-center"><span class="text-[11px] text-[#8a7266] font-medium mr-1">押してもらったスタンプ:</span>` + historyReactionsHtml + `</div>`;
-            } else {
-              historyReactionsHtml = `<div class="mt-2 pt-2 border-t border-black/5 text-[11px] text-[#a08a7e]">まだスタンプは届いていません</div>`;
-            }
-          }
-
           card.innerHTML = `
-            <div class="flex items-start gap-3">
-              <div class="shrink-0 mt-0.5">${renderCreatureHtml(rec.animal, faceImgName, "creature-container")}</div>
-              <div class="flex-1">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-xs text-[#a08a7e] font-medium">${rec.time || ''}</span>
-                  <span class="text-xs text-rose-400 font-bold bg-rose-50 px-2 py-0.5 rounded-full">♡ ${likesCount}</span>
-                </div>
-                <p class="text-sm font-medium text-[#4a3e3d] mb-1.5 leading-relaxed">${rec.text}</p>
-                <div class="flex flex-wrap gap-1">
-                  ${emoTags}
-                </div>
+            <div class="shrink-0 mt-0.5">${renderCreatureHtml(rec.animal, faceImgName, "creature-container")}</div>
+            <div class="flex-1">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs text-[#a08a7e] font-medium">${rec.time || ''}</span>
+                <span class="text-xs text-rose-400 font-bold bg-rose-50 px-2 py-0.5 rounded-full">♡ ${likesCount}</span>
+              </div>
+              <p class="text-sm font-medium text-[#4a3e3d] mb-1.5 leading-relaxed">${rec.text}</p>
+              <div class="flex flex-wrap gap-1">
+                ${emoTags}
               </div>
             </div>
-            ${historyReactionsHtml}
           `;
           container.appendChild(card);
         });
