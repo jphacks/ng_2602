@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ココロのコ</title>
+  <title>ココロ♡のコ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,12 +22,12 @@
 
     /* ヘッダーのグラデーション */
     .header-gradient {
-      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, #f9d8bc 100%);
+      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, rgba(249, 216, 188, 0) 100%);
     }
 
-    /* 下側ナビゲーション：上側とまったく同じグラデーション＆完全に不透明で透けない */
+    /* 下側ナビゲーション：上が薄く、下が濃い不透明グラデーション */
     .nav-gradient-bottom {
-      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, #f9d8bc 100%);
+      background: linear-gradient(180deg, #f9d8bc 0%, #f5a373 100%);
     }
 
     @keyframes floatSlow {
@@ -40,6 +40,7 @@
 
     ::-webkit-scrollbar {
       width: 4px;
+      height: 4px;
     }
     ::-webkit-scrollbar-thumb {
       background: #e0bba8;
@@ -146,6 +147,18 @@
       opacity: 1;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
     }
+
+    /* 詳細表示内の7連画像スタイル */
+    .detail-gallery-img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.6);
+      border: 1px solid #ebd8ce;
+      padding: 2px;
+      shrink: 0;
+    }
   </style>
 </head>
 <body class="flex justify-center min-h-screen bg-[#ECFFE8]">
@@ -236,7 +249,7 @@
 
     </main>
 
-    <!-- ボトムナビゲーション（上側とまったく同じグラデーション＆不透明） -->
+    <!-- ボトムナビゲーション（上が薄く、下が濃い不透明グラデーション） -->
     <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-28 nav-gradient-bottom flex justify-around items-center z-30 shadow-2xl border-t border-[#f2c7a8] px-4">
       <div onclick="switchTab('tl')" class="cursor-pointer flex items-center justify-center">
         <img id="nav-tl" src="広場.png" alt="広場" class="nav-img nav-active" onerror="this.onerror=null; this.outerHTML='<span class=\'font-bold text-sm text-[#7a4838]\'>広場</span>';">
@@ -272,6 +285,17 @@
     const EMOTION_TYPES = [
       "うれしい", "かなしい", "たのしい", "わくわく", "むかつく",
       "あんしん", "もやもや", "ゆううつ", "くるしい", "はずかしい"
+    ];
+
+    // 詳細表示時に並べる7種類の画像リスト
+    const DETAIL_GALLERY_IMAGES = [
+      "無題2194_20261025110110.png",
+      "無題2194_20261025110128.png",
+      "無題2194_20261025110133.png",
+      "無題2194_20261025110140.png",
+      "無題2194_20261025110146.png",
+      "無題2194_20261025110151.png",
+      "無題2194_20261025110222.png"
     ];
 
     let currentYear = 2026;
@@ -496,6 +520,11 @@
             }).join('')
           : `<span class="text-[10px] bg-[#f0e8e2] text-[#8a7a70] px-1.5 py-0.5 rounded">#言葉にならない気持ち</span>`;
 
+        // 詳細表示時の7連画像HTMLを生成
+        const galleryHtml = DETAIL_GALLERY_IMAGES.map(imgSrc => 
+          `<img src="${imgSrc}" class="detail-gallery-img" onerror="this.style.display='none';">`
+        ).join('');
+
         bubble.innerHTML = `
           <div class="flex items-center justify-between gap-2">
             <span class="text-left leading-relaxed pointer-events-none">${summaryText}</span>
@@ -506,8 +535,12 @@
           <div class="pointer-events-none">${publicIndicator}</div>
           <div id="detail-${post.id}" class="hidden text-left pt-2 border-t border-black/5 text-xs font-normal text-[#5a483e] animate-pop pointer-events-none">
             <p class="mb-1 leading-relaxed">${post.text}</p>
-            <div class="flex flex-wrap gap-1 mt-1">
+            <div class="flex flex-wrap gap-1 mt-1 mb-2">
               ${emoTagsHtml}
+            </div>
+            <!-- 内容のしたあたりの7連画像 -->
+            <div class="flex items-center gap-1 overflow-x-auto pt-1 pb-1">
+              ${galleryHtml}
             </div>
           </div>
         `;
