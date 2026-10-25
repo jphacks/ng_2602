@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ココロ♡のコ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: #71c385;
+      color: #4a3e3d;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header-gradient {
+      background: linear-gradient(180deg, #f5a373 0%, #f9d8bc 70%, rgba(249, 216, 188, 0) 100%);
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(1deg); }
+    }
+    .floating-element {
+      animation: floatSlow 3.5s ease-in-out infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e0bba8;
+      border-radius: 4px;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .speech-bubble {
+      position: relative;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 18px;
+      border: 1px solid #e2f0e5;
+    }
+
+    /* 動物＋表情レイヤー重ね合わせスタイル */
+    .creature-container {
+      position: relative;
+      display: inline-block;
+      width: 64px;
+      height: 64px;
+    }
+    .creature-base-img, .creature-face-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .creature-face-img {
+      z-index: 2;
+    }
+
+    /* カレンダー用アイコン（小） */
+    .creature-container-sm {
+      position: relative;
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ロゴ画像スタイル */
+    .logo-img {
+      max-width: 220px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      mix-blend-mode: multiply;
+    }
+  </style>
+</head>
+<body class="flex justify-center min-h-screen bg-[#71c385]">
+
+  <div id="app-wrapper" class="w-full max-w-md bg-[#71c385] min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden">
+
+    <!-- ヘッダー (ロゴ.png) -->
+    <header class="header-gradient pt-4 pb-2 px-4 text-center z-10 sticky top-0 flex flex-col items-center justify-center">
+      <img src="ロゴ.png" alt="ココロのコ" class="logo-img" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-2xl font-black text-[#7a4838]\'>ココロ♡のコ</div>';">
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main id="main-content" class="flex-1 relative overflow-y-auto pb-24 bg-[#71c385]">
+
+      <!-- ================= TL（タイムライン） ================= -->
+      <section id="tab-tl" class="min-h-full bg-[#71c385] p-4 flex flex-col items-center">
+        <!-- 物理的に重ならない縦ストリームエリア -->
+        <div id="tl-stream" class="w-full flex flex-col gap-4 mt-2"></div>
+      </section>
+
+      <!-- ================= 記録 ================= -->
+      <section id="tab-record" class="hidden min-h-full bg-[#fdfbf7] p-5 flex flex-col gap-5">
+        
+        <div class="text-center my-2">
+          <p class="text-lg font-medium text-[#73584c]">どんなことがありましたか？</p>
+          <p class="text-xs text-[#a08a7e] mt-1">短くても長くなっても大丈夫です</p>
+        </div>
+
+        <div class="bg-white/90 border border-[#eddcd2] rounded-2xl p-3 shadow-sm">
+          <textarea id="diary-input" rows="3" 
+            placeholder="今日あったことやメモを書いてみよう..." 
+            class="w-full bg-transparent resize-none border-none focus:outline-none text-sm text-[#4a3e3d] placeholder-[#c4b2a8]"></textarea>
+        </div>
+
+        <!-- 気持ちの選択 ＆ 1〜5段階スライダー -->
+        <div class="bg-white/80 border border-[#f0e3da] rounded-2xl p-4 shadow-sm">
+          <p class="text-sm font-bold text-[#6b5246] mb-1 text-center">どんな気持ちでしたか？</p>
+          <p class="text-[11px] text-[#a08a7e] mb-3 text-center">当てはまる感情にチェックを入れて、強さ（1〜5）を選んでね</p>
+          
+          <div id="emotions-container" class="flex flex-col gap-2.5">
+            <!-- JSで動的に感情行（チェックボックス＋スライダー 1〜5）を生成 -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-2 py-1">
+          <input type="checkbox" id="is-public" checked class="w-4 h-4 accent-[#e88873] rounded cursor-pointer">
+          <label for="is-public" class="text-sm font-medium text-[#6e584c] cursor-pointer">詳しい内容を公開する</label>
+        </div>
+
+        <button onclick="submitRecord()" class="w-2/3 mx-auto bg-[#eba496] text-white font-bold py-3 px-6 rounded-full shadow-md hover:bg-[#e49283] active:scale-95 transition text-center tracking-wider mt-2">
+          記録
+        </button>
+
+      </section>
+
+      <!-- ================= 過去 (カレンダー) ================= -->
+      <section id="tab-history" class="hidden min-h-full bg-[#fdfbf7] p-4">
+        
+        <div class="text-center mb-3">
+          <h2 class="text-lg font-bold text-[#6b5246] tracking-wide">カレンダー</h2>
+        </div>
+
+        <div class="bg-[#ebdcd5]/70 border border-[#e2cfc7] rounded-2xl p-4 shadow-sm">
+          
+          <div class="flex justify-between items-center mb-4 px-2">
+            <span id="calendar-month-title" class="text-md font-bold text-[#5e493e]">2026年 10月</span>
+            <div class="flex gap-2">
+              <button onclick="changeMonth(-1)" class="text-xs bg-white/90 border border-[#d9c4ba] px-3 py-1.5 rounded-lg text-[#6e584c] shadow-xs hover:bg-white active:scale-95 transition font-bold">先月</button>
+              <button onclick="changeMonth(1)" class="text-xs bg-white/90 border border-[#d9c4ba] px-3 py-1.5 rounded-lg text-[#6e584c] shadow-xs hover:bg-white active:scale-95 transition font-bold">来月</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-[#8a7266] mb-2">
+            <span class="text-rose-400">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="text-sky-400">土</span>
+          </div>
+
+          <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+
+        </div>
+
+        <div id="day-detail-container" class="mt-4 flex flex-col gap-2">
+          <div class="bg-white border border-[#ebd8ce] rounded-2xl p-4 shadow-sm text-center">
+            <p class="text-xs text-[#a08a7e]">日付をタップするとその日のすべての記録が見られます</p>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ボトムナビゲーション -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-16 bg-[#e0c9bc] flex justify-between items-stretch z-30 shadow-lg border-t border-[#d4b9ab]">
+      <button id="nav-tl" onclick="switchTab('tl')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#3e5343] transition-all bg-[#8bc99c]">
+        TL
+      </button>
+      <button id="nav-record" onclick="switchTab('record')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#52332a] transition-all bg-[#e38571]">
+        記録
+      </button>
+      <button id="nav-history" onclick="switchTab('history')" class="flex-1 flex items-center justify-center font-bold text-lg text-[#574943] transition-all bg-[#d8c3b7]">
+        過去
+      </button>
+    </nav>
+
+    <!-- 誕生演出モーダル -->
+    <div id="birth-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 text-center max-w-xs w-full shadow-2xl animate-pop border border-[#edd3c5] flex flex-col items-center">
+        <h3 class="text-lg font-bold text-[#73584c] mb-1">ココロノコが誕生！</h3>
+        <div id="modal-creature-wrapper" class="my-4 floating-element flex justify-center">
+          <!-- JSで動物＋表情レイヤーを挿入 -->
+        </div>
+        <p id="modal-text" class="text-sm text-[#5a483e] font-medium mb-1">「何やら新しいココロが生まれたよ」</p>
+        <p id="modal-emotions" class="text-xs text-[#9c8477] mb-4"></p>
+        <button onclick="closeModal()" class="w-full bg-[#e88873] text-white font-bold py-2.5 rounded-xl shadow hover:bg-[#e07761] transition">
+          みんなのもとへ放つ
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 6種類の動物ベース画像
+    const ANIMAL_BASES = ["いぬ", "うさぎ", "くま", "とら", "オオカミ", "リス"];
+
+    // 選択可能な感情（※「ほっこり」は削除済み）
+    const EMOTION_TYPES = [
+      "うれしい", "かなしい", "たのしい", "わくわく", "むかつく",
+      "あんしん", "もやもや", "ゆううつ", "くるしい", "はずかしい"
+    ];
+
+    let currentYear = 2026;
+    let currentMonth = 10;
+    const TODAY_KEY = "2026-10-25";
+
+    // 表情レイヤーマッピング（感情から対応する画像名を取得）
+    function getFaceImageName(emotions) {
+      if (!emotions || emotions.length === 0) {
+        return "ふくざつ.png"; // 未選択時の言い表せない複雑な感情
+      }
+
+      // 最も強さ(val)が高い感情、または一番目の感情を取得
+      let mainEmotion = emotions[0];
+      if (typeof mainEmotion === 'object' && mainEmotion.name) {
+        let maxVal = -1;
+        emotions.forEach(e => {
+          if (e.val > maxVal) {
+            maxVal = e.val;
+            mainEmotion = e.
