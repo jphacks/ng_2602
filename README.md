@@ -26,18 +26,17 @@
 
 ## 開発技術
 ### 活用した技術
-html,css,javascript
+html,css,javascript,Gemini
 #### API・データ
 なし 
 
 #### フレームワーク・ライブラリ・モジュール
-* 
-* 
+なし
 
 #### デバイス
 * ノートPC(Windows)
-* 
-* 
+ 
+  
 
 ### 独自技術
 なし
