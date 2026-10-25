@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ココロのコ</title>
+  <title>ココロ♡のコ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,6 +53,15 @@
       background: rgba(255, 255, 255, 0.95);
       border-radius: 18px;
       border: 1px solid #e2f0e5;
+    }
+
+    /* 自分の投稿の吹き出し（薄い黄色・視認性重視） */
+    .speech-bubble-mine {
+      position: relative;
+      background: rgba(255, 253, 235, 0.98);
+      border-radius: 18px;
+      border: 1px solid #f3e6b3;
+      box-shadow: 0 2px 6px rgba(230, 200, 120, 0.2);
     }
 
     /* 動物＋表情レイヤー重ね合わせスタイル */
@@ -137,6 +146,7 @@
         
         <div class="text-center my-2">
           <p class="text-lg font-medium text-[#73584c]">どんなことがありましたか？</p>
+          <p class="text-xs text-[#a08a7e] mt-1">短くても長くなっても大丈夫です</p>
         </div>
 
         <div class="bg-white/90 border border-[#eddcd2] rounded-2xl p-3 shadow-sm">
@@ -148,7 +158,7 @@
         <!-- 気持ちの選択 ＆ 1〜5段階スライダー -->
         <div class="bg-white/80 border border-[#f0e3da] rounded-2xl p-4 shadow-sm">
           <p class="text-sm font-bold text-[#6b5246] mb-1 text-center">どんな気持ちでしたか？</p>
-          <p class="text-[11px] text-[#a08a7e] mb-3 text-center">当てはまる感情にチェックを入れて、気持ちの強さを選択してください</p>
+          <p class="text-[11px] text-[#a08a7e] mb-3 text-center">当てはまる感情にチェックを入れて、強さ（1〜5）を選んでください</p>
           
           <div id="emotions-container" class="flex flex-col gap-2.5">
             <!-- JSで動的に感情行（チェックボックス＋スライダー 1〜5）を生成 -->
@@ -342,7 +352,6 @@
       ]
     };
 
-    // 現在画面に表示されている投稿のID順リスト（♡を押しても並び順が変わらないように保持）
     let currentTLOrder = [];
 
     function initEmotionInputs() {
@@ -404,7 +413,6 @@
         main.style.backgroundColor = '#B6EEBA';
         wrapper.style.backgroundColor = '#B6EEBA';
         
-        // 画面切替時にハート数で新しくソートして配置を更新
         sortTLOrder();
         renderTL();
       } else if (tabName === 'record') {
@@ -421,7 +429,6 @@
       }
     }
 
-    // ハート数で最新の表示順リストを作成する関数
     function sortTLOrder() {
       const sorted = [...posts].sort((a, b) => a.likes - b.likes);
       currentTLOrder = sorted.map(p => p.id);
@@ -431,7 +438,6 @@
       const stream = document.getElementById('tl-stream');
       stream.innerHTML = '';
 
-      // currentTLOrder に従って投稿を取得・描画（ソートし直さないため並び順が維持される）
       const displayPosts = currentTLOrder
         .map(id => posts.find(p => p.id === id))
         .filter(p => p !== undefined);
@@ -448,7 +454,8 @@
         const faceImgName = getFaceImageName(post.emotions);
 
         const bubble = document.createElement('div');
-        bubble.className = "speech-bubble text-[#4a3e3d] text-xs font-bold px-3.5 py-2.5 shadow-md w-full text-center mb-1 flex flex-col gap-1.5 cursor-pointer";
+        // 自分の投稿（isMine）の場合は薄い黄色のクラス（speech-bubble-mine）を適用
+        bubble.className = (post.isMine ? "speech-bubble-mine" : "speech-bubble") + " text-[#4a3e3d] text-xs font-bold px-3.5 py-2.5 shadow-md w-full text-center mb-1 flex flex-col gap-1.5 cursor-pointer";
 
         const heartDisplay = post.isMine ? `♡ <span id="like-count-${post.id}" class="ml-1">${post.likes}</span>` : `♡`;
 
@@ -511,7 +518,6 @@
       });
     }
 
-    // ♡ボタンクリック時の処理（画面を再描画・ソートせず部分的に表示だけ更新）
     function likePost(event, postId) {
       event.stopPropagation();
       const post = posts.find(p => p.id === postId);
@@ -523,7 +529,6 @@
         const randomFace = FACE_IMAGES[Math.floor(Math.random() * FACE_IMAGES.length)];
         post.likedCreatures.push({ animal: randomAnimal, face: randomFace });
 
-        // カレンダー履歴側のハート数も同期
         if (post.isMine) {
           for (let dateKey in historyRecords) {
             const hRec = historyRecords[dateKey].find(r => r.id === postId);
@@ -534,7 +539,6 @@
           }
         }
 
-        // DOMの一部のみをダイレクト更新（位置移動を発生させない）
         const countEl = document.getElementById(`like-count-${postId}`);
         if (countEl) {
           countEl.innerText = post.likes;
@@ -730,7 +734,7 @@
     }
 
     initEmotionInputs();
-    sortTLOrder(); // 初期ロード時の並び順を作成
+    sortTLOrder();
     switchTab('tl');
   </script>
 
