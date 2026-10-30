@@ -1,6 +1,6 @@
 # Webアプリ「ココロのコ」
 
-[![IMAGE ALT TEXT HERE](https://jphacks.com/wp-content/uploads/2026/07/IMG_5316.png)](https://www.youtube.com/watch?v=piaNsc6ilBI)
+https://github.com/user-attachments/assets/724704dd-284e-434e-ae4c-979fc164b286
 
 ## 行き場のない気持ちに対する共感を目的としたWebアプリ
 ### 「他人の目を気にせずに気持ちを吐き出したい」<br>「行き場のない気持ちに対して誰かが共感してくれる場が欲しい」<br>そんな悩みを解決するWebアプリを、現代のSNSとは異なるアプローチから目指します。
